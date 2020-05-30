@@ -1,0 +1,54 @@
+<div class="container">
+  <h1 class="bg-primary text-white p-2 text-center mt-2">{{ title || 'SPFx With Anular Elements - CRUD Demo'}}</h1>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h3>Add Task</h3>
+          <form #toDoForm="ngForm" *ngIf="!submitted">
+            <div class="form-group">
+              <label for="name">Task Name</label>
+              <input type="text" class="form-control" name="Title" id="title" ngModel>
+            </div>
+            <button type="submit" class="btn btn-primary mr-2" (click)="submit(toDoForm)">Submit</button>
+            <button type="reset" class="btn btn-light">Cancel</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h3>To Do Details</h3>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Task Id</th>
+                <th>Title</th>
+                <th>Edit Item</th>
+                <th>Delete Item</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let todo of todos; let i=index">
+                <td scope="row">{{todo.Id}}</td>
+                <ng-container *ngIf="!(editToDo?.Id===todo.Id); else EditMode">
+                  <td scope="row">{{todo.Title}}</td>
+                  <td><button type="button" class="btn btn-primary" (click)="edit(todo)">Edit</button></td>
+                  <td><button type="button" class="btn btn-danger" (click)="delete(todo, i)">Remove</button></td>
+                </ng-container>
+                <ng-template #EditMode>
+                  <td scope="row">
+                    <input type="text" class="form-control" name="Title" [(ngModel)]="todo.Title">
+                  </td>
+                  <td><button type="button" class="btn btn-success" (click)="update(todo)">Update</button></td>
+                  <td><button type="button" class="btn btn-dark"
+                      (click)="todos[i] = editToDo; editToDo = undefined">Cancel</button></td>
+                </ng-template>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
