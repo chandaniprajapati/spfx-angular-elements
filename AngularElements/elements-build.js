@@ -6,7 +6,6 @@ const concat = require('concat');
     './dist/AngularElements/runtime-es2015.js',
     './dist/AngularElements/polyfills-es5.js',
     './dist/AngularElements/polyfills-es2015.js',
-    // './dist/AngularElements/scripts-es5.js',
     './dist/AngularElements/main-es5.js',
     './dist/AngularElements/main-es2015.js'
   ];

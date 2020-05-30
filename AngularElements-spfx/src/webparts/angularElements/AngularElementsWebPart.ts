@@ -21,11 +21,7 @@ export default class AngularElementsWebPart extends BaseClientSideWebPart<IAngul
 
   public render(): void {
     const siteUrl = this.context.pageContext.web.absoluteUrl;
-    this.domElement.innerHTML = `<app-angular-elements-web-part id="aeForm" title="${ this.properties.title }" siteUrl="${siteUrl}"></app-angular-elements-web-part>`;
-    const formElement = document.getElementById('aeForm');
-    formElement.addEventListener('save', (contactDetails)=> {
-      console.log('This are the contact Details : ', contactDetails);
-    });
+    this.domElement.innerHTML = `<app-angular-elements-web-part title="${ this.properties.title }" siteUrl="${siteUrl}"></app-angular-elements-web-part>`;
   }
 
   protected get dataVersion(): Version {
