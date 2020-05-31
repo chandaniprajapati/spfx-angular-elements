@@ -21,7 +21,9 @@ export default class AngularElementsWebPart extends BaseClientSideWebPart<IAngul
 
   public render(): void {
     const siteUrl = this.context.pageContext.web.absoluteUrl;
-    this.domElement.innerHTML = `<app-angular-elements-web-part title="${ this.properties.title }" siteUrl="${siteUrl}"></app-angular-elements-web-part>`;
+    console.log(siteUrl);
+    this.domElement.innerHTML = `<app-angular-elements-web-part id="ae" title="${ this.properties.title }" siteurl="${siteUrl}"></app-angular-elements-web-part>`;
+    console.log(document.getElementById("ae"));
   }
 
   protected get dataVersion(): Version {

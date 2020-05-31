@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { environment } from 'src/environments/environment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToDo } from '../models/todo.model';
 import { map, tap, catchError } from 'rxjs/operators';
-import { Observable, EMPTY } from 'rxjs';
+import { EMPTY } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
@@ -19,60 +18,79 @@ export class AppService {
     this.BASE_URL = url || this.BASE_URL;
   }
 
-  private getItemTypeForListName(name) {
-    return 'SP.Data.' + name.charAt(0).toUpperCase() + name.split(' ').join('').slice(1) + 'ListItem';
+  getFormDigest() {
+
+    const headers: HttpHeaders = new HttpHeaders({
+      Accept: 'application/json;odata=verbose'
+    });
+
+    return this.httpClient.post<any>(`${this.BASE_URL}/_api/contextinfo`, {}, { headers })
+      .pipe(map(data => data.d.GetContextWebInformation.FormDigestValue))
+      .toPromise();
   }
 
   getToDos() {
-    return this.httpClient.get<any>(`${this.BASE_URL}_api/web/lists/getbytitle('To Do')/items?$select=Id,Title,Status`).pipe(
+    return this.httpClient.get<any>(`${this.BASE_URL}/_api/web/lists/getbytitle('To Do')/items?$select=Id,Title,Status`).pipe(
       map(response => response.value as ToDo[])
-    );
+    ).toPromise();
   }
 
-  addToDo(toDo: ToDo): Observable<ToDo> {
-    return this.httpClient.post<any>(`${this.BASE_URL}_api/web/lists/getbytitle('To Do')/items`, toDo).pipe(
-      map(p => ({ Id: p.Id, Title: p.Title })),
+  async addToDo(toDo: ToDo) {
+
+    const input = {
+      __metadata: { type: 'SP.Data.To_x0020_DoListItem' },
+      Title: toDo.Title
+    };
+
+    const headers: HttpHeaders = new HttpHeaders({
+      'Content-Type': 'application/json;odata=verbose',
+      Accept: 'application/json;odata=verbose',
+      'X-RequestDigest': await this.getFormDigest()
+    });
+
+    return this.httpClient.post<any>(`${this.BASE_URL}/_api/web/lists/getbytitle('To Do')/items`, input, { headers }).pipe(
+      map(p => p.d ? ({ Id: p.d.Id, Title: p.d.Title }) : null),
       catchError(error => {
         console.log(error);
         return EMPTY;
       })
-    );
+    ).toPromise();
   }
 
-  updateToDo(todo: ToDo) {
+  async updateToDo(todo: ToDo) {
 
     const { Title } = todo;
     const input = {
-      __metadata : {type: 'SP.Data.To_x0020_DoListItem'},
+      __metadata: { type: 'SP.Data.To_x0020_DoListItem' },
       Title
     };
 
-
-    const headers: HttpHeaders =  new HttpHeaders({
-        'X-HTTP-Method': 'MERGE',
-        'IF-MATCH': '*',
-        Accept: 'application/json;odata=verbose',
-        'Content-Type': 'application/json;odata=verbose'
+    const headers: HttpHeaders = new HttpHeaders({
+      'X-HTTP-Method': 'MERGE',
+      'IF-MATCH': '*',
+      Accept: 'application/json;odata=verbose',
+      'Content-Type': 'application/json;odata=verbose',
+      'X-RequestDigest': await this.getFormDigest()
     });
 
-    // tslint:disable-next-line:max-line-length
-    return this.httpClient.post<any>(`${this.BASE_URL}_api/web/lists/getbytitle('To Do')/items(${todo.Id})`, input, {headers}).pipe(
-        tap(response => console.log('Update Response => ', response))
-      );
+    return this.httpClient.post<any>(`${this.BASE_URL}/_api/web/lists/getbytitle('To Do')/items(${todo.Id})`, input, { headers }).pipe(
+      tap(response => console.log('Update Response => ', response))
+    ).toPromise();
   }
 
-  deleteToDo(todo: ToDo) {
+  async deleteToDo(todo: ToDo) {
 
-    const headers: HttpHeaders =  new HttpHeaders({
+    const headers: HttpHeaders = new HttpHeaders({
       'X-HTTP-Method': 'DELETE',
       'IF-MATCH': '*',
       Accept: 'application/json;odata=verbose',
-      'Content-Type': 'application/json;odata=verbose'
+      'Content-Type': 'application/json;odata=verbose',
+      'X-RequestDigest': await this.getFormDigest()
     });
 
-    return this.httpClient.post<any>(`${this.BASE_URL}_api/web/lists/getbytitle('To Do')/items(${todo.Id})`, {}, {headers}).pipe(
+    return this.httpClient.post<any>(`${this.BASE_URL}/_api/web/lists/getbytitle('To Do')/items(${todo.Id})`, {}, { headers }).pipe(
       tap(response => console.log('Delete Response => ', response))
-    );
+    ).toPromise();
   }
 
 
